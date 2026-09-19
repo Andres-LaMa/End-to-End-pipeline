@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-api
+  labels:
+    app: todo-api
+spec:
+  replicas: 1                          # SQLite не умеет шариться между репликами
+  strategy:
+    type: Recreate                      # сначала убить старый под, потом создать новый
+  selector:
+    matchLabels:
+      app: todo-api
+  template:
+    metadata:
+      labels:
+        app: todo-api
+    spec:
+      containers:
+        - name: api
+          image: todo-app:local
+          imagePullPolicy: Never        # образ уже загружен в Minikube
+          ports:
+            - containerPort: 8000
+          env:
+            - name: TODO_DB_DIR
+              value: /data
+          volumeMounts:
+            - name: todo-data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: todo-data
+          persistentVolumeClaim:
+            claimName: todo-data
