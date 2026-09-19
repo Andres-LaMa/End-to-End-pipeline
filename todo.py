@@ -2,6 +2,7 @@
 """Todo List // Blackjack Edition. Чистый stdlib, Python 3.14."""
 import curses
 import locale
+import os
 import random
 import sqlite3
 from datetime import datetime

@@ -4,7 +4,6 @@ import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -37,9 +36,9 @@ class TaskIn(BaseModel):
 
 
 class TaskPatch(BaseModel):
-    title: Optional[str] = Field(None, min_length=1, max_length=200)
-    priority: Optional[int] = Field(None, ge=1, le=3)
-    done: Optional[bool] = None
+    title: str | None = Field(None, min_length=1, max_length=200)
+    priority: int | None = Field(None, ge=1, le=3)
+    done: bool | None = None
 
 
 @app.get("/healthz")
@@ -74,11 +73,14 @@ def create_task(task: TaskIn):
 def update_task(task_id: int, patch: TaskPatch):
     fields, values = [], []
     if patch.title is not None:
-        fields.append("title = ?"); values.append(patch.title)
+        fields.append("title = ?")
+        values.append(patch.title)
     if patch.priority is not None:
-        fields.append("priority = ?"); values.append(patch.priority)
+        fields.append("priority = ?")
+        values.append(patch.priority)
     if patch.done is not None:
-        fields.append("done = ?"); values.append(1 if patch.done else 0)
+        fields.append("done = ?")
+        values.append(1 if patch.done else 0)
     if not fields:
         raise HTTPException(400, "nothing to update")
     values.append(task_id)
