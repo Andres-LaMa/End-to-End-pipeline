@@ -1,0 +1,17 @@
+services:
+  api:
+    build: .
+    image: todo-app:local
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+
+  tui:
+    image: todo-app:local
+    profiles: ["tui"]      # запускается только явно: docker compose --profile tui run --rm tui
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./data:/data
+    command: ["python", "todo.py"]
