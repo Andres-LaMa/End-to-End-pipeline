@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
 
 DB_DIR = Path(os.environ.get("TODO_DB_DIR", Path(__file__).resolve().parent))
@@ -101,3 +102,5 @@ def delete_task(task_id: int):
         if cur.rowcount == 0:
             raise HTTPException(404, "task not found")
     return None
+
+Instrumentator().instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
